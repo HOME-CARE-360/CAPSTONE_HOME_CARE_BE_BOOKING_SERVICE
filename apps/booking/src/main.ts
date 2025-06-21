@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
-import { ManagersModule } from './managers.module';
+import { ManagersModule } from './booking.module';
 import { Transport } from '@nestjs/microservices';
 
 async function bootstrap() {
