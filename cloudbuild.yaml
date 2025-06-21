@@ -4,23 +4,22 @@ steps:
       [
         'build',
         '-t',
-        'asia-southeast1-docker.pkg.dev/home-care-360/manager/production',
+        'asia-southeast1-docker.pkg.dev/home-care-360/booking/production',
         '-f',
-        'apps/manager/Dockerfile',
+        'apps/booking/Dockerfile',
         '.',
       ]
   - name: 'gcr.io/cloud-builders/docker'
     args:
       [
         'push',
-        'asia-southeast1-docker.pkg.dev/home-care-360/manager/production',
+        'asia-southeast1-docker.pkg.dev/home-care-360/booking/production',
       ]
   - name: 'gcr.io/cloud-builders/kubectl'
-    args: ['rollout', 'restart', 'deployment/manager']
+    args: ['rollout', 'restart', 'deployment/booking']
     env:
       - 'CLOUDSDK_COMPUTE_REGION=asia-east1'
       - 'CLOUDSDK_CONTAINER_CLUSTER=autopilot-cluster-1'
       - 'CLOUDSDK_CORE_PROJECT=home-care-360'
 options:
   logging: CLOUD_LOGGING_ONLY
-  

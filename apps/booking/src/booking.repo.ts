@@ -8,7 +8,7 @@ import { PrismaService } from "libs/common/src/services/prisma.service";
 export class BookingRepository {
     constructor(private readonly prismaService: PrismaService) { }
     async createServiceRequest(body: CreateServiceRequestBodyType) {
-        await this.prismaService.serviceRequest.create({
+        return await this.prismaService.serviceRequest.create({
             data: {
                 ...body
             }
