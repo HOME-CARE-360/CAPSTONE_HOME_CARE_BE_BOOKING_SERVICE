@@ -1,4 +1,4 @@
-import { Controller, Inject, Post } from "@nestjs/common";
+import { Controller, Inject } from "@nestjs/common";
 import { BookingsService } from "./booking.service";
 import { MessagePattern, Payload } from "@nestjs/microservices";
 import { CreateServiceRequestBodyType } from "libs/common/src/request-response-type/booking/booking.model";
@@ -10,11 +10,14 @@ import { handleZodError } from "libs/common/helpers";
 @Controller('bookings')
 export class BookingsController {
   constructor(private readonly bookingsService: BookingsService, @Inject(PAYMENT_SERVICE) private readonly paymentRawTcpClient: RawTcpClientService) { }
-  @MessagePattern({ cmd: "create-request-service" })
+  @MessagePattern({ cmd: "create-service-request" })
   async createRequestService(@Payload() { body, userId }: { body: CreateServiceRequestBodyType, userId: number }) {
+    console.log("service is going");
 
     const booking = await this.bookingsService.createServiceRequest(body)
     try {
+      console.log("hihi1");
+
       return await this.paymentRawTcpClient.send({
         type: 'CREATE_TRANSACTION', data: {
           bookingId: booking.id,
@@ -23,6 +26,8 @@ export class BookingsController {
         }
       })
     } catch (error) {
+      console.log(error);
+
       handleZodError(error)
     }
   }
