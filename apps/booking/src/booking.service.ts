@@ -21,6 +21,8 @@ export class BookingsService {
 
   ) { }
   async createServiceRequest(body: CreateServiceRequestBodyType) {
+
+
     const [category, provider] = await Promise.all([this.sharedCategoriesRepository.findUnique([body.categoryId]), this.sharedProviderRepository.findUnique({ id: body.providerId })])
     if (category.length < 1) throw InvalidCategoryIdException([body.categoryId])
     if (!provider) throw ServiceProviderNotFoundException
