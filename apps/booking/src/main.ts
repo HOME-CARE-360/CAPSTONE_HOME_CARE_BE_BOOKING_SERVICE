@@ -1,10 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
-import { ManagersModule } from './booking.module';
+
 import { Transport } from '@nestjs/microservices';
+import { BookingsModule } from './booking.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(ManagersModule);
+  const app = await NestFactory.create(BookingsModule);
   const configService = app.get(ConfigService)
   app.enableCors({});
 

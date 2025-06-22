@@ -12,6 +12,8 @@ export class BookingsController {
   constructor(private readonly bookingsService: BookingsService, @Inject(PAYMENT_SERVICE) private readonly paymentRawTcpClient: RawTcpClientService) { }
   @MessagePattern({ cmd: "create-service-request" })
   async createRequestService(@Payload() { body, userId }: { body: CreateServiceRequestBodyType, userId: number }) {
+    console.log(body, userId);
+
     console.log("service is going");
 
     const booking = await this.bookingsService.createServiceRequest(body)
