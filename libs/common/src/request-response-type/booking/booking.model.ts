@@ -7,7 +7,7 @@ export const CreateServiceRequestBodySchema = ServiceRequestSchema.omit({
     updatedAt: true,
     createdAt: true,
     status: true,
-    id: true
+    id: true, customerId: true
 }).extend({
     paymentMethod: z.enum([PaymentMethod.BANK_TRANSFER, PaymentMethod.CREDIT_CARD])
 }).strict()

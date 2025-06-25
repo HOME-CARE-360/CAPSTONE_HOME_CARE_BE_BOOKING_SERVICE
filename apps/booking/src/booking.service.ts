@@ -20,15 +20,15 @@ export class BookingsService {
     private readonly rabbit: RabbitService,
 
   ) { }
-  async createServiceRequest(body: CreateServiceRequestBodyType) {
+  async createServiceRequest(body: CreateServiceRequestBodyType, customerId: number) {
 
 
     const [category, provider] = await Promise.all([this.sharedCategoriesRepository.findUnique([body.categoryId]), this.sharedProviderRepository.findUnique({ id: body.providerId })])
     if (category.length < 1) throw InvalidCategoryIdException([body.categoryId])
     if (!provider) throw ServiceProviderNotFoundException
-    const serviceRequest = await this.bookingRepository.createServiceRequest(body)
+    const serviceRequest = await this.bookingRepository.createServiceRequest(body, customerId)
     return this.sharedBookingsRepository.create({
-      customerId: body.customerId,
+      customerId: customerId,
       providerId: body.providerId,
       status: BookingStatus.PENDING,
       inspectionStatus: InspectionStatus.NOT_YET,

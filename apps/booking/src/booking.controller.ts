@@ -16,7 +16,7 @@ export class BookingsController {
 
     console.log("service is going");
 
-    const booking = await this.bookingsService.createServiceRequest(body)
+    const booking = await this.bookingsService.createServiceRequest(body, userId)
     try {
       console.log("hihi1");
 
