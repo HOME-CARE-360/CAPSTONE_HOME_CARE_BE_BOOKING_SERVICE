@@ -12,7 +12,7 @@ export class BookingsController {
   constructor(private readonly bookingsService: BookingsService, @Inject(PAYMENT_SERVICE) private readonly paymentRawTcpClient: RawTcpClientService) { }
   @MessagePattern({ cmd: "create-service-request" })
   async createRequestService(@Payload() { body, customerID, userId }: { body: CreateServiceRequestBodyType, customerID: number, userId: number }) {
-    console.log(body, userId);
+    console.log(body, userId, customerID);
 
     console.log("service is going");
 
