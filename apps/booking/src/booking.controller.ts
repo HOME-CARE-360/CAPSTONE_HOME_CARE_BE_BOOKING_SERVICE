@@ -11,12 +11,12 @@ import { handleZodError } from "libs/common/helpers";
 export class BookingsController {
   constructor(private readonly bookingsService: BookingsService, @Inject(PAYMENT_SERVICE) private readonly paymentRawTcpClient: RawTcpClientService) { }
   @MessagePattern({ cmd: "create-service-request" })
-  async createRequestService(@Payload() { body, userId }: { body: CreateServiceRequestBodyType, userId: number }) {
+  async createRequestService(@Payload() { body, customerID, userId }: { body: CreateServiceRequestBodyType, customerID: number, userId: number }) {
     console.log(body, userId);
 
     console.log("service is going");
 
-    const booking = await this.bookingsService.createServiceRequest(body, userId)
+    const booking = await this.bookingsService.createServiceRequest(body, customerID)
     try {
       console.log("hihi1");
 
