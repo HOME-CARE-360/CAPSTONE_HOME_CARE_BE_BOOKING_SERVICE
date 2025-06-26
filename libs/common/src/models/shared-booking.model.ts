@@ -1,4 +1,4 @@
-import { BookingStatus, InspectionStatus } from '@prisma/client';
+import { BookingStatus } from '@prisma/client';
 import { z } from 'zod';
 
 
@@ -10,10 +10,6 @@ export const BookingSchema = z.object({
     deletedAt: z.date().nullable().optional(),
     createdAt: z.date(),
     updatedAt: z.date(),
-    inspectedAt: z.date().nullable().optional(),
-    inspectedById: z.number().nullable().optional(),
-    inspectionNote: z.string().nullable().optional(),
-    inspectionStatus: z.nativeEnum(InspectionStatus),
     staffId: z.number().nullable().optional(),
     serviceRequestId: z.number().nullable().optional(),
 });

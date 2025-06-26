@@ -598,4 +598,6 @@ enum RequestStatus {
   PENDING
   IN_PROGRESS
   ESTIMATED
+  BOOKED
+  REJECTED
 }

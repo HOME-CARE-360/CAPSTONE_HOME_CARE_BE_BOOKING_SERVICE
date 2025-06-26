@@ -33,6 +33,8 @@ export class BookingsService {
       status: BookingStatus.PENDING,
       serviceRequestId: serviceRequest.id,
 
+
+
     })
   }
 
