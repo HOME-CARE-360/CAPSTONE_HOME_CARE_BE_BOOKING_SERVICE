@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BookingStatus, InspectionStatus } from '@prisma/client';
+import { BookingStatus } from '@prisma/client';
 import { InvalidCategoryIdException } from 'libs/common/src/errors/share-category.error';
 import { ServiceProviderNotFoundException } from 'libs/common/src/errors/share-provider.error';
 
@@ -31,7 +31,6 @@ export class BookingsService {
       customerId: customerId,
       providerId: body.providerId,
       status: BookingStatus.PENDING,
-      inspectionStatus: InspectionStatus.NOT_YET,
       serviceRequestId: serviceRequest.id,
 
     })

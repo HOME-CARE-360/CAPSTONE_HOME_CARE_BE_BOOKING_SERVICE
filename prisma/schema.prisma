@@ -1,5 +1,6 @@
 generator client {
   provider      = "prisma-client-js"
+  output        = "../node_modules/.prisma/client"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -215,7 +216,6 @@ model Staff {
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   isActive          Boolean            @default(true)
-  inspectedBookings Booking[]          @relation("BookingInspectedBy")
   booking           Booking?           @relation("StaffBooking")
   inspectionReports InspectionReport[]
   reviews           Review[]
@@ -328,14 +328,9 @@ model Booking {
   deletedAt        DateTime?
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
-  inspectedAt      DateTime?
-  inspectedById    Int?
-  inspectionNote   String?
-  inspectionStatus InspectionStatus  @default(NOT_YET)
   staffId          Int?              @unique
   serviceRequestId Int?              @unique
   customer         CustomerProfile   @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  inspectedBy      Staff?            @relation("BookingInspectedBy", fields: [inspectedById], references: [id])
   provider         ServiceProvider   @relation(fields: [providerId], references: [id], onDelete: Cascade)
   serviceRequest   ServiceRequest?   @relation(fields: [serviceRequestId], references: [id])
   staff            Staff?            @relation("StaffBooking", fields: [staffId], references: [id], onDelete: Cascade)
@@ -603,6 +598,4 @@ enum RequestStatus {
   PENDING
   IN_PROGRESS
   ESTIMATED
-  BOOKED
-  REJECTED
 }
