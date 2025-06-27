@@ -13,7 +13,8 @@ export class BookingRepository {
         return await this.prismaService.serviceRequest.create({
             data: {
                 ...rest,
-                customerId
+                customerId,
+
 
             }
         })
