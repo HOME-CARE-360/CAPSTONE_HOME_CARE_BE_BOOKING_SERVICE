@@ -16,7 +16,7 @@ import { ShareStaffRepository } from './repositories/shared-staff.repo';
 import { SharedCategoryRepository } from './repositories/shared-category.repo';
 import { RabbitMQModule } from './modules/rabbitmq.module';
 import { RabbitService } from './services/rabbit.service';
-// import { SharedBookingRepository } from './repositories/shared-booking.repo';
+import { SharedBookingRepository } from './repositories/shared-booking.repo';
 const sharedServices = [
   PrismaService,
   HashingService,
@@ -32,7 +32,7 @@ const sharedServices = [
   ShareStaffRepository,
   SharedCategoryRepository,
   RabbitService,
-  // SharedBookingRepository
+  SharedBookingRepository
 ]
 
 @Global()
