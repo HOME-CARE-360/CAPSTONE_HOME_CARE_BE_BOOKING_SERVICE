@@ -11,10 +11,14 @@ export const CreateServiceRequestBodySchema = ServiceRequestSchema.omit({
 }).extend({
     paymentMethod: z.enum([PaymentMethod.BANK_TRANSFER, PaymentMethod.CREDIT_CARD])
 }).strict()
+export const CancelBookingSchema =ServiceRequestSchema.pick({
+    id: true
+}).strict()
 export const CreateBookingBodySchema = BookingSchema.omit({
     updatedAt: true,
     createdAt: true,
     id: true
 }).strict()
+export type CancelBookingType =z.infer<typeof CancelBookingSchema>
 export type CreateServiceRequestBodyType = z.infer<typeof CreateServiceRequestBodySchema>
 export type CreateBookingBodyType = z.infer<typeof CreateBookingBodySchema>

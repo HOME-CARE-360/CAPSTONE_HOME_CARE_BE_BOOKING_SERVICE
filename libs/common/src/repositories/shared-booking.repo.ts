@@ -12,5 +12,12 @@ export class SharedBookingRepository {
             }
         })
     }
+    async findUniqueServiceRequest(id: number) {
+        return await this.prismaService.serviceRequest.findUnique({
+            where: {
+                id
+            }
+        })
+    }
 
 }

@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
-import { CreateServiceRequestBodyType } from "libs/common/src/request-response-type/booking/booking.model";
+import { RequestStatus } from "@prisma/client";
+import { CancelBookingType, CreateServiceRequestBodyType } from "libs/common/src/request-response-type/booking/booking.model";
 import { PrismaService } from "libs/common/src/services/prisma.service";
 
 
@@ -16,6 +17,15 @@ export class BookingRepository {
                 customerId,
 
 
+            }
+        })
+    }
+    async cancelBooking(body: CancelBookingType) {
+        return await this.prismaService.serviceRequest.update({
+            where: {
+                id: body.id
+            }, data: {
+                status: RequestStatus.REJECTED
             }
         })
     }

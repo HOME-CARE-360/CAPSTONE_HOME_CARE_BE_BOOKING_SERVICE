@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { BookingStatus } from '@prisma/client';
+import { BookingStatus, RequestStatus } from '@prisma/client';
 import { InvalidCategoryIdException } from 'libs/common/src/errors/share-category.error';
 import { ServiceProviderNotFoundException } from 'libs/common/src/errors/share-provider.error';
 
 import { SharedProviderRepository } from 'libs/common/src/repositories/share-provider.repo';
 import { SharedBookingRepository } from 'libs/common/src/repositories/shared-booking.repo';
 import { SharedCategoryRepository } from 'libs/common/src/repositories/shared-category.repo';
-import { CreateServiceRequestBodyType } from 'libs/common/src/request-response-type/booking/booking.model';
+import { CancelBookingType, CreateServiceRequestBodyType } from 'libs/common/src/request-response-type/booking/booking.model';
 import { RabbitService } from 'libs/common/src/services/rabbit.service';
 import { BookingRepository } from './booking.repo';
+import { ServiceRequestInvalidStatusException, ServiceRequestNotFoundException } from './booking.error';
 
 @Injectable()
 export class BookingsService {
@@ -36,6 +37,17 @@ export class BookingsService {
 
 
     })
+  }
+  async cancelBooking(body: CancelBookingType, providerId: number) {
+    const serviceRequest = await this.sharedBookingsRepository.findUniqueServiceRequest(body.id)
+
+    if (!serviceRequest) {
+      throw ServiceRequestNotFoundException
+    } else {
+      if (serviceRequest.status !== RequestStatus.PENDING) throw ServiceRequestInvalidStatusException
+      if (serviceRequest.providerId !== providerId) throw BookingNotFoundOrNotBelongToProviderException
+    }
+
   }
 
 }
