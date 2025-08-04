@@ -19,3 +19,19 @@ export const ServiceRequestInvalidStatusException = new RpcException(
         },
     ])
 );
+export const BookingNotFoundOrNotBelongToProviderException = new RpcException(
+    new UnprocessableEntityException([
+        {
+            message: 'Error.BookingNotFoundOrNotBelongToProvider',
+            path: ['bookingId'],
+        },
+    ])
+);
+export const UserInvalidRoleException = new RpcException(
+    new UnprocessableEntityException([
+        {
+            message: 'Error.UserMustBeCustomerOrProvider',
+            path: ['user'],
+        },
+    ])
+);

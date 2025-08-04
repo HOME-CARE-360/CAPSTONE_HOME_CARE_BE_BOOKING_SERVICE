@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 
 import { Transport } from '@nestjs/microservices';
 import { BookingsModule } from './booking.module';
-
+import { IoAdapter } from '@nestjs/platform-socket.io';
 async function bootstrap() {
   const app = await NestFactory.create(BookingsModule);
   const configService = app.get(ConfigService)
@@ -17,6 +17,7 @@ async function bootstrap() {
 
     }
   })
+  app.useWebSocketAdapter(new IoAdapter(app));
   await app.startAllMicroservices()
   await app.listen(configService.get("BOOKING_HTTP_PORT") as string, "0.0.0.0");
   console.log(`🚀 App listening on port ${process.env.BOOKING_HTTP_PORT as string}`);

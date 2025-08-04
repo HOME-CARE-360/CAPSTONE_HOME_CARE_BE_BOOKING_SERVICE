@@ -1,5 +1,6 @@
 generator client {
   provider      = "prisma-client-js"
+         output        = "../node_modules/.prisma/client"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -9,49 +10,49 @@ datasource db {
 }
 
 model User {
-  id                 Int               @id @default(autoincrement())
-  email              String            @unique
+  id                 Int                 @id @default(autoincrement())
+  email              String              @unique
   password           String
-  name               String            @db.VarChar(500)
-  phone              String            @db.VarChar(50)
-  avatar             String?           @db.VarChar(1000)
-  totpSecret         String?           @db.VarChar(1000)
-  status             UserStatus        @default(INACTIVE)
+  name               String              @db.VarChar(500)
+  phone              String              @db.VarChar(50)
+  avatar             String?             @db.VarChar(1000)
+  totpSecret         String?             @db.VarChar(1000)
+  status             UserStatus          @default(INACTIVE)
   createdById        Int?
   updatedById        Int?
   deletedById        Int?
   deletedAt          DateTime?
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
-  createdCategories  Category[]        @relation("CategoryCreatedBy")
-  deletedCategories  Category[]        @relation("CategoryDeletedBy")
-  updatedCategories  Category[]        @relation("CategoryUpdatedBy")
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  createdCategories  Category[]          @relation("CategoryCreatedBy")
+  deletedCategories  Category[]          @relation("CategoryDeletedBy")
+  updatedCategories  Category[]          @relation("CategoryUpdatedBy")
   customerProfile    CustomerProfile?
   devices            Device[]
-  createdLanguages   Language[]        @relation("LanguageCreatedBy")
-  deletedLanguages   Language[]        @relation("LanguageDeletedBy")
-  updatedLanguages   Language[]        @relation("LanguageUpdatedBy")
   notifications      Notification[]
-  createdPermissions Permission[]      @relation("PermissionCreatedBy")
-  deletedPermissions Permission[]      @relation("PermissionDeletedBy")
-  updatedPermissions Permission[]      @relation("PermissionUpdatedBy")
+  createdPermissions Permission[]        @relation("PermissionCreatedBy")
+  deletedPermissions Permission[]        @relation("PermissionDeletedBy")
+  updatedPermissions Permission[]        @relation("PermissionUpdatedBy")
+  ProviderReport     ProviderReport[]
   refreshTokens      RefreshToken[]
-  createdRoles       Role[]            @relation("RoleCreatedBy")
-  deletedRoles       Role[]            @relation("RoleDeletedBy")
-  updatedRoles       Role[]            @relation("RoleUpdatedBy")
-  createdServices    Service[]         @relation("ServiceCreatedBy")
-  deletedServices    Service[]         @relation("ServiceDeletedBy")
-  updatedServices    Service[]         @relation("ServiceUpdatedBy")
+  createdRoles       Role[]              @relation("RoleCreatedBy")
+  deletedRoles       Role[]              @relation("RoleDeletedBy")
+  updatedRoles       Role[]              @relation("RoleUpdatedBy")
+  createdServices    Service[]           @relation("ServiceCreatedBy")
+  deletedServices    Service[]           @relation("ServiceDeletedBy")
+  updatedServices    Service[]           @relation("ServiceUpdatedBy")
   serviceProvider    ServiceProvider?
-  verifiedProviders  ServiceProvider[] @relation("VerifiedProviders")
+  verifiedProviders  ServiceProvider[]   @relation("VerifiedProviders")
   staff              Staff?
-  createdBy          User?             @relation("CreatorUsers", fields: [createdById], references: [id])
-  createdUsers       User[]            @relation("CreatorUsers")
-  deletedBy          User?             @relation("DeletorUsers", fields: [deletedById], references: [id])
-  deletedUsers       User[]            @relation("DeletorUsers")
-  updatedBy          User?             @relation("UpdatorUsers", fields: [updatedById], references: [id])
-  updatedUsers       User[]            @relation("UpdatorUsers")
-  roles              Role[]            @relation("UserRoles")
+  createdBy          User?               @relation("CreatorUsers", fields: [createdById], references: [id])
+  createdUsers       User[]              @relation("CreatorUsers")
+  deletedBy          User?               @relation("DeletorUsers", fields: [deletedById], references: [id])
+  deletedUsers       User[]              @relation("DeletorUsers")
+  updatedBy          User?               @relation("UpdatorUsers", fields: [updatedById], references: [id])
+  updatedUsers       User[]              @relation("UpdatorUsers")
+  Wallet             Wallet?
+  WithdrawalRequest  WithdrawalRequest[]
+  roles              Role[]              @relation("UserRoles")
 
   @@index([deletedAt])
 }
@@ -103,6 +104,7 @@ model Device {
   lastActive    DateTime       @updatedAt
   createdAt     DateTime       @default(now())
   isActive      Boolean        @default(true)
+  fcmToken      String?
   user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   refreshTokens RefreshToken[]
 }
@@ -132,38 +134,6 @@ model VerificationCode {
   @@index([expiresAt])
 }
 
-model Language {
-  id                   String                       @id @db.VarChar(10)
-  name                 String                       @db.VarChar(500)
-  createdById          Int?
-  updatedById          Int?
-  deletedById          Int?
-  deletedAt            DateTime?
-  createdAt            DateTime                     @default(now())
-  updatedAt            DateTime                     @updatedAt
-  categoryTranslations CategoryTranslation[]
-  createdBy            User?                        @relation("LanguageCreatedBy", fields: [createdById], references: [id])
-  deletedBy            User?                        @relation("LanguageDeletedBy", fields: [deletedById], references: [id])
-  updatedBy            User?                        @relation("LanguageUpdatedBy", fields: [updatedById], references: [id])
-  providerTranslations ServiceProviderTranslation[]
-  serviceTranslations  ServiceTranslation[]
-
-  @@index([deletedAt])
-}
-
-model ServiceTranslation {
-  id          Int       @id @default(autoincrement())
-  serviceId   Int
-  languageId  String
-  name        String    @db.VarChar(500)
-  description String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
-  language    Language  @relation(fields: [languageId], references: [id], onDelete: Cascade)
-  service     Service   @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-}
-
 model CategoryTranslation {
   id          Int       @id @default(autoincrement())
   categoryId  Int
@@ -174,7 +144,6 @@ model CategoryTranslation {
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
   category    Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  language    Language  @relation(fields: [languageId], references: [id], onDelete: Cascade)
 }
 
 model ServiceProviderTranslation {
@@ -186,7 +155,6 @@ model ServiceProviderTranslation {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   deletedAt       DateTime?
-  language        Language        @relation(fields: [languageId], references: [id], onDelete: Cascade)
   serviceProvider ServiceProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
 }
 
@@ -200,8 +168,10 @@ model CustomerProfile {
   updatedAt              DateTime                @updatedAt
   bookings               Booking[]
   chatMessages           ChatMessage[]
+  Conversation           Conversation[]
   user                   User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
   packageRecommendations PackageRecommendation[]
+  ProviderReport         ProviderReport[]
   recurringBookings      RecurringBooking[]
   reviews                Review[]
   rewardPoints           RewardPoint[]
@@ -215,7 +185,7 @@ model Staff {
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   isActive          Boolean            @default(true)
-  booking           Booking?           @relation("StaffBooking")
+  booking           Booking[]          @relation("StaffBooking")
   inspectionReports InspectionReport[]
   reviews           Review[]
   serviceProvider   ServiceProvider    @relation(fields: [providerId], references: [id], onDelete: Cascade)
@@ -249,12 +219,16 @@ model ServiceProvider {
   verifiedAt          DateTime?
   verifiedById        Int?
   bookings            Booking[]
+  Conversation        Conversation[]
+  ProviderReport      ProviderReport[]
   services            Service[]
+  ServiceItem         ServiceItem[]
   user                User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
   verifiedBy          User?                        @relation("VerifiedProviders", fields: [verifiedById], references: [id])
   translationsService ServiceProviderTranslation[]
   serviceRequests     ServiceRequest[]
   staff               Staff[]
+  WithdrawalRequest   WithdrawalRequest[]
 }
 
 model Category {
@@ -274,49 +248,62 @@ model Category {
   childrenCategories Category[]            @relation("ParentCategoryCategories")
   updatedBy          User?                 @relation("CategoryUpdatedBy", fields: [updatedById], references: [id])
   translations       CategoryTranslation[]
+  Service            Service[]
   serviceRequests    ServiceRequest[]
   staffCategories    StaffCategory[]
-  services           Service[]             @relation("ServiceCategories")
 
   @@index([deletedAt])
 }
 
 model Service {
-  id                 Int                  @id @default(autoincrement())
-  basePrice          Float
-  virtualPrice       Float
-  images             String[]
-  durationMinutes    Int
-  providerId         Int
-  createdById        Int?
-  updatedById        Int?
-  deletedById        Int?
-  deletedAt          DateTime?
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
-  name               String               @default("test") @db.VarChar(100)
-  publishedAt        DateTime?            @default(now())
-  description        String               @default("test description") @db.VarChar(100)
-  proposedInBookings ProposedService[]
-  recurringBookings  RecurringBooking[]
-  reviews            Review[]
-  createdBy          User?                @relation("ServiceCreatedBy", fields: [createdById], references: [id])
-  deletedBy          User?                @relation("ServiceDeletedBy", fields: [deletedById], references: [id])
-  provider           ServiceProvider      @relation(fields: [providerId], references: [id], onDelete: Cascade)
-  updatedBy          User?                @relation("ServiceUpdatedBy", fields: [updatedById], references: [id])
-  attachedItems      ServiceItem[]
-  translations       ServiceTranslation[]
-  categories         Category[]           @relation("ServiceCategories")
+  id                   Int                    @id @default(autoincrement())
+  basePrice            Float
+  virtualPrice         Float
+  images               String[]
+  durationMinutes      Int
+  providerId           Int
+  createdById          Int?
+  updatedById          Int?
+  deletedById          Int?
+  deletedAt            DateTime?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  name                 String                 @default("test") @db.VarChar(100)
+  publishedAt          DateTime?              @default(now())
+  description          String                 @default("test description") @db.VarChar(5000)
+  categoryId           Int
+  unit                 Unit                   @default(PER_JOB)
+  status               ServiceStatus          @default(PENDING)
+  ProposalItem         ProposalItem[]
+  recurringBookings    RecurringBooking[]
+  reviews              Review[]
+  Category             Category               @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdBy            User?                  @relation("ServiceCreatedBy", fields: [createdById], references: [id])
+  deletedBy            User?                  @relation("ServiceDeletedBy", fields: [deletedById], references: [id])
+  provider             ServiceProvider        @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  updatedBy            User?                  @relation("ServiceUpdatedBy", fields: [updatedById], references: [id])
+  Service_ServiceItems Service_ServiceItems[]
 
   @@index([deletedAt])
 }
 
 model ServiceItem {
-  id        Int     @id @default(autoincrement())
-  name      String  @db.VarChar(255)
-  unitPrice Float
-  serviceId Int
-  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  id                   Int                    @id @default(autoincrement())
+  name                 String                 @db.VarChar(255)
+  unitPrice            Float
+  warrantyPeriod       Int?
+  createdAt            DateTime               @default(now())
+  deletedAt            DateTime?
+  updatedAt            DateTime
+  brand                String?                @db.VarChar(255)
+  description          String?                @db.VarChar(1000)
+  isActive             Boolean                @default(true)
+  model                String?                @db.VarChar(255)
+  stockQuantity        Int                    @default(0)
+  unit                 Unit                   @default(PER_ITEM)
+  providerId           Int
+  ServiceProvider      ServiceProvider        @relation(fields: [providerId], references: [id])
+  Service_ServiceItems Service_ServiceItems[]
 }
 
 model Booking {
@@ -327,48 +314,38 @@ model Booking {
   deletedAt        DateTime?
   createdAt        DateTime          @default(now())
   updatedAt        DateTime          @updatedAt
-  staffId          Int?              @unique
+  staffId          Int?
   serviceRequestId Int?              @unique
   customer         CustomerProfile   @relation(fields: [customerId], references: [id], onDelete: Cascade)
   provider         ServiceProvider   @relation(fields: [providerId], references: [id], onDelete: Cascade)
   serviceRequest   ServiceRequest?   @relation(fields: [serviceRequestId], references: [id])
   staff            Staff?            @relation("StaffBooking", fields: [staffId], references: [id], onDelete: Cascade)
   inspectionReport InspectionReport?
-  proposedServices ProposedService[]
+  Proposal         Proposal?
+  ProviderReport   ProviderReport[]
   transaction      Transaction?
   workLogs         WorkLog[]
 }
 
 model ServiceRequest {
-  id            Int             @id @default(autoincrement())
-  customerId    Int
-  providerId    Int
-  note          String?
-  preferredDate DateTime
-  status        RequestStatus   @default(PENDING)
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  location      String          @db.VarChar(500)
-  phoneNumber   String
-  categoryId    Int
-  booking       Booking?
-  category      Category        @relation(fields: [categoryId], references: [id])
-  customer      CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  provider      ServiceProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  id                 Int                 @id @default(autoincrement())
+  customerId         Int
+  providerId         Int
+  note               String?
+  preferredDate      DateTime
+  status             RequestStatus       @default(PENDING)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  location           String              @db.VarChar(500)
+  phoneNumber        String
+  categoryId         Int
+  booking            Booking?
+  PaymentTransaction PaymentTransaction?
+  category           Category            @relation(fields: [categoryId], references: [id])
+  customer           CustomerProfile     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  provider           ServiceProvider     @relation(fields: [providerId], references: [id], onDelete: Cascade)
 
   @@index([status])
-}
-
-model ProposedService {
-  id        Int      @id @default(autoincrement())
-  bookingId Int
-  serviceId Int
-  quantity  Int      @default(1)
-  price     Float
-  notes     String?
-  createdAt DateTime @default(now())
-  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
 }
 
 model InspectionReport {
@@ -400,18 +377,22 @@ model Transaction {
 }
 
 model PaymentTransaction {
-  id                 Int      @id @default(autoincrement())
-  gateway            String   @db.VarChar(100)
-  transactionDate    DateTime @default(now())
-  accountNumber      String?  @db.VarChar(100)
-  subAccount         String?  @db.VarChar(250)
-  amountIn           Int      @default(0)
-  amountOut          Int      @default(0)
-  accumulated        Int      @default(0)
-  referenceNumber    String?  @db.VarChar(255)
+  id                 Int                      @id @default(autoincrement())
+  gateway            String                   @db.VarChar(100)
+  transactionDate    DateTime                 @default(now())
+  accountNumber      String?                  @db.VarChar(100)
+  subAccount         String?                  @db.VarChar(250)
+  amountIn           Int                      @default(0)
+  amountOut          Int                      @default(0)
+  accumulated        Int                      @default(0)
+  referenceNumber    String?                  @db.VarChar(255)
   transactionContent String?
   body               String?
-  createdAt          DateTime @default(now())
+  createdAt          DateTime                 @default(now())
+  serviceRequestId   Int?                     @unique
+  status             PaymentTransactionStatus
+  userId             Int?
+  ServiceRequest     ServiceRequest?          @relation(fields: [serviceRequestId], references: [id])
 }
 
 model Review {
@@ -492,13 +473,115 @@ model ChatMessage {
   customer   CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Cascade)
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-model spatial_ref_sys {
-  srid      Int     @id
-  auth_name String? @db.VarChar(256)
-  auth_srid Int?
-  srtext    String? @db.VarChar(2048)
-  proj4text String? @db.VarChar(2048)
+model Conversation {
+  id               Int             @id @default(autoincrement())
+  customerId       Int
+  providerId       Int
+  lastMessage      String?         @db.VarChar(500)
+  lastMessageAt    DateTime?
+  unreadByCustomer Int             @default(0)
+  unreadByProvider Int             @default(0)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime
+  CustomerProfile  CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  ServiceProvider  ServiceProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  Message          Message[]
+
+  @@unique([customerId, providerId])
+  @@index([lastMessageAt])
+}
+
+model Message {
+  id             Int            @id @default(autoincrement())
+  conversationId Int
+  senderType     ChatSenderType
+  senderId       Int
+  content        String?        @db.VarChar(2000)
+  imageUrl       String?        @db.VarChar(1000)
+  isRead         Boolean        @default(false)
+  sentAt         DateTime       @default(now())
+  Conversation   Conversation   @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, sentAt])
+}
+
+model Proposal {
+  id           Int            @id @default(autoincrement())
+  bookingId    Int            @unique
+  notes        String?
+  createdAt    DateTime       @default(now())
+  status       ProposalStatus @default(ACCEPTED)
+  Booking      Booking        @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  ProposalItem ProposalItem[]
+}
+
+model ProposalItem {
+  id         Int      @id @default(autoincrement())
+  proposalId Int
+  serviceId  Int
+  quantity   Int      @default(1)
+  createdAt  DateTime @default(now())
+  Proposal   Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  Service    Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+}
+
+model ProviderReport {
+  id              Int             @id @default(autoincrement())
+  customerId      Int
+  providerId      Int
+  bookingId       Int
+  reason          String          @db.VarChar(255)
+  description     String?         @db.VarChar(2000)
+  imageUrls       String[]
+  status          ReportStatus    @default(PENDING)
+  createdAt       DateTime        @default(now())
+  reviewedAt      DateTime?
+  reviewedById    Int?
+  note            String?         @db.VarChar(1000)
+  Booking         Booking         @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  CustomerProfile CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  ServiceProvider ServiceProvider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  User            User?           @relation(fields: [reviewedById], references: [id])
+
+  @@index([customerId])
+  @@index([providerId])
+  @@index([status])
+}
+
+model Service_ServiceItems {
+  serviceId     Int
+  serviceItemId Int
+  Service       Service     @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  ServiceItem   ServiceItem @relation(fields: [serviceItemId], references: [id], onDelete: Cascade)
+
+  @@id([serviceId, serviceItemId])
+}
+
+model Wallet {
+  id            Int      @id @default(autoincrement())
+  userId        Int      @unique
+  balance       Float    @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime
+  accountHolder String?  @db.VarChar(255)
+  bankAccount   String?  @db.VarChar(100)
+  bankName      String?  @db.VarChar(255)
+  User          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model WithdrawalRequest {
+  id              Int              @id @default(autoincrement())
+  providerId      Int
+  amount          Float
+  status          WithdrawalStatus @default(PENDING)
+  createdAt       DateTime         @default(now())
+  processedAt     DateTime?
+  processedById   Int?
+  note            String?          @db.VarChar(1000)
+  User            User?            @relation(fields: [processedById], references: [id])
+  ServiceProvider ServiceProvider  @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@index([status])
 }
 
 enum UserStatus {
@@ -587,16 +670,59 @@ enum InspectionStatus {
   DONE
 }
 
-enum TimeOffStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
 enum RequestStatus {
   PENDING
   IN_PROGRESS
   ESTIMATED
-  BOOKED
+  CANCELLED
+}
+
+enum ChatSenderType {
+  CUSTOMER
+  PROVIDER
+}
+
+enum PaymentTransactionStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+  FAILED
+  CANCELLED
+  REFUNDED
+  EXPIRED
+  MANUAL_REVIEW
+}
+
+enum ProposalStatus {
+  ACCEPTED
   REJECTED
+  PENDING
+}
+
+enum ReportStatus {
+  PENDING
+  UNDER_REVIEW
+  RESOLVED
+  REJECTED
+}
+
+enum ServiceStatus {
+  PENDING
+  REJECTED
+  ACCEPTED
+}
+
+enum Unit {
+  PER_HOUR
+  PER_ITEM
+  PER_SQUARE_METER
+  PER_JOB
+}
+
+enum WithdrawalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+  COMPLETED
 }
