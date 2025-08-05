@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BookingStatus, ChatSenderType, RequestStatus } from '@prisma/client';
+import { BookingStatus, RequestStatus } from '@prisma/client';
 import { InvalidCategoryIdException } from 'libs/common/src/errors/share-category.error';
 import { ServiceProviderNotFoundException } from 'libs/common/src/errors/share-provider.error';
 
@@ -66,7 +66,7 @@ export class BookingsService {
   async createMessage(body: CreateMessageBodyType, user: AccessTokenPayload) {
 
     const senderType = user.roles[0].name
-    return await this.bookingRepository.createMessage(user.userId, senderType as ChatSenderType, body)
+    return await this.bookingRepository.createMessage(user.userId, senderType, body)
   }
   async markMessagesAsRead(conversationId: number, user: AccessTokenPayload) {
     const senderType = user.roles[0].name

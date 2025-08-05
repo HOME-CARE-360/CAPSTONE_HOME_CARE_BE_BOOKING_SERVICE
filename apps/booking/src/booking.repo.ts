@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { ChatSenderType, RequestStatus } from "@prisma/client";
+import { RoleName } from "libs/common/src/constants/role.constant";
 import { CancelBookingType, CreateServiceRequestBodyType } from "libs/common/src/request-response-type/booking/booking.model";
 import { CreateMessageBodyType, GetListMessageQueryType } from "libs/common/src/request-response-type/chat/chat.model";
 import { PrismaService } from "libs/common/src/services/prisma.service";
@@ -98,11 +99,11 @@ export class BookingRepository {
             }
         };
     }
-    async createMessage(senderId: number, role: ChatSenderType, body: CreateMessageBodyType) {
+    async createMessage(senderId: number, role: string, body: CreateMessageBodyType) {
 
-
+        const senderType = role === RoleName.ServiceProvider ? ChatSenderType.PROVIDER : ChatSenderType.CUSTOMER
         const message = await this.prismaService.message.create({
-            data: { senderId, senderType: role, conversationId: body.conversationId, content: body.content, imageUrl: body.imageUrl },
+            data: { senderId, senderType: senderType, conversationId: body.conversationId, content: body.content, imageUrl: body.imageUrl },
         });
 
         await this.prismaService.conversation.update({
