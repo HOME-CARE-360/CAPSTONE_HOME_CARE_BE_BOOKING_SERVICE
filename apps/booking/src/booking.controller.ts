@@ -32,6 +32,8 @@ export class BookingsController {
   }
   @MessagePattern({ cmd: "create-message" })
   async createMessage(@Payload() { user, body }: { user: AccessTokenPayload, body: CreateMessageBodyType }) {
+    console.log("vo 1");
+
     return await this.bookingsService.createMessage(body, user)
   }
   @MessagePattern({ cmd: "get-user-conversation" })
@@ -56,8 +58,10 @@ export class BookingsController {
   async checkParticipant(
     @Payload() payload: { user: AccessTokenPayload; conversationId: number }
   ): Promise<boolean> {
+    console.log("vo r");
+
     const { user, conversationId } = payload;
-    return this.bookingsService.isUserInConversation(conversationId, userId, role);
+    return this.bookingsService.isUserInConversation(conversationId, user);
   }
 
 }
