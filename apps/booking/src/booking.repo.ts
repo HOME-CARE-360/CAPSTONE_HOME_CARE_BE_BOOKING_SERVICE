@@ -136,5 +136,16 @@ export class BookingRepository {
             },
         });
     }
+    async isUserInConversation(conversationId: number) {
+        const conversation = await this.prismaService.conversation.findUnique({
+            where: { id: conversationId },
+            select: {
+                customerId: true,
+                providerId: true
+            },
+        });
+        return conversation
+    }
+
 
 }

@@ -72,4 +72,17 @@ export class BookingsService {
     const senderType = user.roles[0].name
     return await this.bookingRepository.markMessagesAsRead(conversationId, senderType)
   }
+  async isUserInConversation(conversationId: number, user: AccessTokenPayload): Promise<boolean> {
+
+    const conversation = await this.bookingRepository.isUserInConversation(conversationId)
+    if (!conversation) return false;
+
+    if (user.roles[0].name === 'CUSTOMER') {
+      return conversation.customerId === user.customerId;
+    } else if (user.roles[0].name === 'SERVICE PROVIDER') {
+      return conversation.providerId === user.providerId;
+    }
+
+    return false;
+  }
 }

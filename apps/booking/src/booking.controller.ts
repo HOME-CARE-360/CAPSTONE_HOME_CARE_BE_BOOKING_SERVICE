@@ -52,5 +52,12 @@ export class BookingsController {
   async markMessagesAsRead(@Payload() { user, conversationId }: { user: AccessTokenPayload, conversationId: number }) {
     return await this.bookingsService.markMessagesAsRead(conversationId, user)
   }
+  @MessagePattern({ cmd: 'check-conversation-participant' })
+  async checkParticipant(
+    @Payload() payload: { user: AccessTokenPayload; conversationId: number }
+  ): Promise<boolean> {
+    const { user, conversationId } = payload;
+    return this.bookingsService.isUserInConversation(conversationId, userId, role);
+  }
 
 }
