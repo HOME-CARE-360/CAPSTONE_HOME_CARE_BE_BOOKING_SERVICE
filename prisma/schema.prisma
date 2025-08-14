@@ -1,6 +1,6 @@
 generator client {
   provider      = "prisma-client-js"
-      // output        = "../node_modules/.prisma/client"
+   output        = "../node_modules/.prisma/client"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -703,7 +703,6 @@ enum InspectionStatus {
 enum RequestStatus {
   PENDING
   IN_PROGRESS
-  WAIT_FOR_PAYMENT
   ESTIMATED
   CANCELLED
 }

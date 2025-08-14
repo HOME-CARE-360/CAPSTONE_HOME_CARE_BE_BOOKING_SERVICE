@@ -18,7 +18,7 @@ export class BookingRepository {
             data: {
                 ...rest,
                 customerId,
-                status: RequestStatus.WAIT_FOR_PAYMENT
+                status: RequestStatus.PENDING
 
 
             }
