@@ -30,7 +30,7 @@ export class BookingsService {
     if (category.length < 1) throw InvalidCategoryIdException([body.categoryId])
     if (!provider) throw ServiceProviderNotFoundException
     const serviceRequest = await this.bookingRepository.createServiceRequest(body, customerId)
-    return this.sharedBookingsRepository.create({
+    await this.sharedBookingsRepository.create({
       customerId: customerId,
       providerId: body.providerId,
       status: BookingStatus.PENDING,
@@ -39,6 +39,7 @@ export class BookingsService {
 
 
     })
+    return serviceRequest
   }
   async cancelBooking(body: CancelBookingType, providerId: number) {
     const serviceRequest = await this.sharedBookingsRepository.findUniqueServiceRequest(body.id)

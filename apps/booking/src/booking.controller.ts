@@ -15,15 +15,16 @@ export class BookingsController {
   @MessagePattern({ cmd: "create-service-request" })
   async createRequestService(@Payload() { body, customerID, userId }: { body: CreateServiceRequestBodyType, customerID: number, userId: number }) {
     console.log(body, userId, customerID);
-    const booking = await this.bookingsService.createServiceRequest(body, customerID)
+    const serviceRequest = await this.bookingsService.createServiceRequest(body, customerID)
     try {
       return await this.paymentRawTcpClient.send({
         type: 'CREATE_TRANSACTION', data: {
-          bookingId: booking.id,
+          serviceRequestId: serviceRequest.id,
           amount: 100000,
           method: body.paymentMethod, userId
         }
       })
+
     } catch (error) {
       console.log(error);
 
