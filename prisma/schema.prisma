@@ -1,6 +1,5 @@
 generator client {
   provider      = "prisma-client-js"
-    //  output        = "../node_modules/.prisma/client"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -705,6 +704,7 @@ enum RequestStatus {
   IN_PROGRESS
   ESTIMATED
   CANCELLED
+  WAIT_FOR_PAYMENT
 }
 
 enum ChatSenderType {
