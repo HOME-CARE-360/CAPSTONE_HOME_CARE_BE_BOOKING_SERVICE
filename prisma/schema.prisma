@@ -1,6 +1,6 @@
 generator client {
   provider      = "prisma-client-js"
-        //  output        = "../node_modules/.prisma/client"
+      // output        = "../node_modules/.prisma/client"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
 }
 
@@ -170,6 +170,7 @@ model CustomerProfile {
   chatMessages           ChatMessage[]
   Conversation           Conversation[]
   user                   User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  FavoriteService        FavoriteService[]
   packageRecommendations PackageRecommendation[]
   ProviderReport         ProviderReport[]
   recurringBookings      RecurringBooking[]
@@ -187,7 +188,6 @@ model Staff {
   isActive          Boolean            @default(true)
   booking           Booking[]          @relation("StaffBooking")
   inspectionReports InspectionReport[]
-  reviews           Review[]
   serviceProvider   ServiceProvider    @relation(fields: [providerId], references: [id], onDelete: Cascade)
   user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   staffCategories   StaffCategory[]
@@ -232,25 +232,26 @@ model ServiceProvider {
 }
 
 model Category {
-  id                 Int                   @id @default(autoincrement())
-  name               String                @db.VarChar(500)
-  logo               String?               @db.VarChar(1000)
-  parentCategoryId   Int?
-  createdById        Int?
-  updatedById        Int?
-  deletedById        Int?
-  deletedAt          DateTime?
-  createdAt          DateTime              @default(now())
-  updatedAt          DateTime              @updatedAt
-  createdBy          User?                 @relation("CategoryCreatedBy", fields: [createdById], references: [id])
-  deletedBy          User?                 @relation("CategoryDeletedBy", fields: [deletedById], references: [id])
-  parentCategory     Category?             @relation("ParentCategoryCategories", fields: [parentCategoryId], references: [id])
-  childrenCategories Category[]            @relation("ParentCategoryCategories")
-  updatedBy          User?                 @relation("CategoryUpdatedBy", fields: [updatedById], references: [id])
-  translations       CategoryTranslation[]
-  Service            Service[]
-  serviceRequests    ServiceRequest[]
-  staffCategories    StaffCategory[]
+  id                        Int                         @id @default(autoincrement())
+  name                      String                      @db.VarChar(500)
+  logo                      String?                     @db.VarChar(1000)
+  parentCategoryId          Int?
+  createdById               Int?
+  updatedById               Int?
+  deletedById               Int?
+  deletedAt                 DateTime?
+  createdAt                 DateTime                    @default(now())
+  updatedAt                 DateTime                    @updatedAt
+  createdBy                 User?                       @relation("CategoryCreatedBy", fields: [createdById], references: [id])
+  deletedBy                 User?                       @relation("CategoryDeletedBy", fields: [deletedById], references: [id])
+  parentCategory            Category?                   @relation("ParentCategoryCategories", fields: [parentCategoryId], references: [id])
+  childrenCategories        Category[]                  @relation("ParentCategoryCategories")
+  updatedBy                 User?                       @relation("CategoryUpdatedBy", fields: [updatedById], references: [id])
+  translations              CategoryTranslation[]
+  Service                   Service[]
+  serviceRequests           ServiceRequest[]
+  staffCategories           StaffCategory[]
+  suggested_services_config suggested_services_config[]
 
   @@index([deletedAt])
 }
@@ -274,9 +275,9 @@ model Service {
   categoryId           Int
   unit                 Unit                   @default(PER_JOB)
   status               ServiceStatus          @default(PENDING)
+  FavoriteService      FavoriteService[]
   ProposalItem         ProposalItem[]
   recurringBookings    RecurringBooking[]
-  reviews              Review[]
   Category             Category               @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   createdBy            User?                  @relation("ServiceCreatedBy", fields: [createdById], references: [id])
   deletedBy            User?                  @relation("ServiceDeletedBy", fields: [deletedById], references: [id])
@@ -316,6 +317,7 @@ model Booking {
   updatedAt        DateTime          @updatedAt
   staffId          Int?
   serviceRequestId Int?              @unique
+  completedAt      DateTime?         @db.Timestamptz(6)
   customer         CustomerProfile   @relation(fields: [customerId], references: [id], onDelete: Cascade)
   provider         ServiceProvider   @relation(fields: [providerId], references: [id], onDelete: Cascade)
   serviceRequest   ServiceRequest?   @relation(fields: [serviceRequestId], references: [id])
@@ -361,8 +363,8 @@ model InspectionReport {
 }
 
 model Transaction {
-  id          Int           @id @default(autoincrement())
-  bookingId   Int           @unique
+  id          Int               @id @default(autoincrement())
+  bookingId   Int               @unique
   amount      Float
   status      PaymentStatus
   method      PaymentMethod
@@ -371,9 +373,10 @@ model Transaction {
   updatedById Int?
   deletedById Int?
   deletedAt   DateTime?
-  createdAt   DateTime      @default(now())
-  orderCode   String?       @unique @db.VarChar(255)
-  booking     Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime          @default(now())
+  orderCode   String?           @unique @db.VarChar(255)
+  type        transaction_type?
+  booking     Booking           @relation(fields: [bookingId], references: [id], onDelete: Cascade)
 }
 
 model PaymentTransaction {
@@ -398,14 +401,11 @@ model PaymentTransaction {
 model Review {
   id         Int             @id @default(autoincrement())
   customerId Int
-  staffId    Int
-  serviceId  Int
   rating     Int
   comment    String
   createdAt  DateTime        @default(now())
+  bookingId  Int?
   customer   CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  service    Service         @relation(fields: [serviceId], references: [id], onDelete: Cascade)
-  staff      Staff           @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
 model Notification {
@@ -440,16 +440,18 @@ model RewardPoint {
 }
 
 model WorkLog {
-  id        Int       @id @default(autoincrement())
-  staffId   Int
-  bookingId Int
-  checkIn   DateTime?
-  checkOut  DateTime?
-  note      String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  booking   Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  staff     Staff     @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  id             Int       @id @default(autoincrement())
+  staffId        Int
+  bookingId      Int
+  checkIn        DateTime?
+  checkOut       DateTime?
+  note           String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  checkInImages  String[]  @default([])
+  checkOutImages String[]  @default([])
+  booking        Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  staff          Staff     @relation(fields: [staffId], references: [id], onDelete: Cascade)
 }
 
 model PackageRecommendation {
@@ -584,6 +586,31 @@ model WithdrawalRequest {
   @@index([status])
 }
 
+model FavoriteService {
+  id              Int             @id @default(autoincrement())
+  customerId      Int
+  serviceId       Int
+  createdAt       DateTime?       @default(now()) @db.Timestamp(6)
+  CustomerProfile CustomerProfile @relation(fields: [customerId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_fav_customer")
+  Service         Service         @relation(fields: [serviceId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_fav_service")
+
+  @@unique([customerId, serviceId], map: "unique_fav")
+  @@index([customerId], map: "idx_fav_customer")
+  @@index([serviceId], map: "idx_fav_service")
+}
+
+model suggested_services_config {
+  id                        Int       @id @default(autoincrement())
+  category_id               Int
+  display_name              String    @db.VarChar(255)
+  suggested_interval_months Int
+  notification_template     String    @db.VarChar(255)
+  is_active                 Boolean?  @default(true)
+  created_at                DateTime? @default(now()) @db.Timestamp(6)
+  updated_at                DateTime? @default(now()) @db.Timestamp(6)
+  Category                  Category  @relation(fields: [category_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
 enum UserStatus {
   ACTIVE
   INACTIVE
@@ -615,8 +642,10 @@ enum Gender {
 enum BookingStatus {
   PENDING
   CONFIRMED
+  IN_PROGRESS
   COMPLETED
   CANCELLED
+  WAIT_FOR_PAYMENT
 }
 
 enum PaymentStatus {
@@ -629,6 +658,7 @@ enum PaymentMethod {
   CASH
   CREDIT_CARD
   BANK_TRANSFER
+  WALLET
   MOMO
   ZALOPAY
 }
@@ -673,6 +703,7 @@ enum InspectionStatus {
 enum RequestStatus {
   PENDING
   IN_PROGRESS
+  WAIT_FOR_PAYMENT
   ESTIMATED
   CANCELLED
 }
@@ -725,4 +756,9 @@ enum WithdrawalStatus {
   REJECTED
   CANCELLED
   COMPLETED
+}
+
+enum transaction_type {
+  BOOKING_DEPOSIT
+  PROPOSAL_PAYMENT
 }

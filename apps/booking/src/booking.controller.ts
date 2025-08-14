@@ -58,8 +58,6 @@ export class BookingsController {
   async checkParticipant(
     @Payload() payload: { user: AccessTokenPayload; conversationId: number }
   ): Promise<boolean> {
-    console.log("vo r");
-
     const { user, conversationId } = payload;
     return this.bookingsService.isUserInConversation(conversationId, user);
   }
