@@ -33,7 +33,7 @@ export class BookingsService {
     return this.sharedBookingsRepository.create({
       customerId: customerId,
       providerId: body.providerId,
-      status: BookingStatus.WAIT_FOR_PAYMENT,
+      status: BookingStatus.PENDING,
       serviceRequestId: serviceRequest.id,
 
 
