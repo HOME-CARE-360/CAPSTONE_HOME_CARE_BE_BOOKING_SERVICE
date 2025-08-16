@@ -35,3 +35,9 @@ export const UserInvalidRoleException = new RpcException(
         },
     ])
 );
+export const BuildWalletBalanceInsufficientException = (min: number) =>
+    new RpcException(
+        new UnprocessableEntityException([
+            { message: 'Error.WalletBalanceInsufficient', path: ['wallet', 'balance'], meta: { min } },
+        ])
+    );

@@ -14,6 +14,7 @@ export class BookingRepository {
     async createServiceRequest(body: CreateServiceRequestBodyType, customerId: number) {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { paymentMethod, ...rest } = body
+
         return await this.prismaService.serviceRequest.create({
             data: {
                 ...rest,
