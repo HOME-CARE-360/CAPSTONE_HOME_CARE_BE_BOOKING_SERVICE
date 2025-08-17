@@ -30,7 +30,8 @@ export class BookingsService {
     customerId: number,
     userId: number,
   ) {
-    // Lấy dữ liệu song song
+    console.log("toi r");
+
     const [category, provider] = await Promise.all([
       this.sharedCategoriesRepository.findUnique([body.categoryId]),
       this.sharedProviderRepository.findUnique({ id: body.providerId }),
@@ -42,6 +43,7 @@ export class BookingsService {
     let debited = false;
 
     if (body.paymentMethod === PaymentMethod.WALLET) {
+      console.log("cc");
       debited = await this.sharedWidthDrawRepository.debitIfSufficient(
         userId,
         MIN_BALANCE,

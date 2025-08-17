@@ -17,6 +17,7 @@ export class BookingRepository {
 
         return await this.prismaService.serviceRequest.create({
             data: {
+
                 ...rest,
                 customerId,
                 status: RequestStatus.WAIT_FOR_PAYMENT

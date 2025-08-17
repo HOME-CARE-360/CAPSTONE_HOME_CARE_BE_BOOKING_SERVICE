@@ -1,4 +1,4 @@
-import { Controller, Inject } from "@nestjs/common";
+import { Body, Controller, Inject, Post } from "@nestjs/common";
 import { BookingsService } from "./booking.service";
 import { MessagePattern, Payload } from "@nestjs/microservices";
 import { CreateServiceRequestBodyType } from "libs/common/src/request-response-type/booking/booking.model";
@@ -13,61 +13,29 @@ import { PaymentMethod } from "@prisma/client";
 @Controller('bookings')
 export class BookingsController {
   constructor(private readonly bookingsService: BookingsService, @Inject(PAYMENT_SERVICE) private readonly paymentRawTcpClient: RawTcpClientService) { }
-  async createServiceRequest(
-    body: CreateServiceRequestBodyType,
-    customerId: number,
-    userId: number,
-  ) {
-    // Lấy dữ liệu song song
-    const [category, provider, wallet] = await Promise.all([
-      this.sharedCategoriesRepository.findUnique([body.categoryId]),
-      this.sharedProviderRepository.findUnique({ id: body.providerId }),
-      this.sharedWidthDrawRepository.findWalletBalance(userId),
-    ]);
+  @MessagePattern({ cmd: "create-service-request" })
+  // @Post("create-service-request")
+  async createRequestService(@Payload() { body, customerID, userId }: { body: CreateServiceRequestBodyType, customerID: number, userId: number }) {
+    console.log(body, userId, customerID);
+    const serviceRequest = await this.bookingsService.createServiceRequest(body, customerID, userId)
+    if (body.paymentMethod === PaymentMethod.BANK_TRANSFER) {
+      try {
 
-    if (!category?.length) throw InvalidCategoryIdException([body.categoryId]);
-    if (!provider) throw ServiceProviderNotFoundException;
+        return await this.paymentRawTcpClient.send({
+          type: 'CREATE_TRANSACTION', data: {
+            serviceRequestId: serviceRequest.id,
+            amount: 100000,
+            method: body.paymentMethod, userId
+          }
+        })
 
-    let debited = false;
+      } catch (error) {
+        console.log(error);
 
-    if (body.paymentMethod === PaymentMethod.WALLET) {
-      if (!wallet?.Wallet) throw WalletNotFoundException;
-
-      // TRÁNH RACE: trừ tiền nguyên tử, thất bại thì báo thiếu
-      debited = await this.sharedWidthDrawRepository.debitIfSufficient(
-        userId,
-        MIN_BALANCE,
-      );
-      if (!debited) {
-        throw BuildWalletBalanceInsufficientException(MIN_BALANCE);
+        handleZodError(error)
       }
     }
 
-    try {
-      const serviceRequest = await this.bookingRepository.createServiceRequest(
-        body,
-        customerId,
-      );
-
-      await this.sharedBookingsRepository.create({
-        customerId,
-        providerId: body.providerId,
-        status: BookingStatus.PENDING,
-        serviceRequestId: serviceRequest.id,
-      });
-
-      return serviceRequest;
-    } catch (err) {
-      // Nếu đã trừ tiền ví mà lỗi bất kỳ → bù tiền ngay
-      if (debited) {
-        await this.sharedWidthDrawRepository
-          .credit(userId, MIN_BALANCE)
-          .catch(() => {
-            // log lại tuỳ ý; tránh throw đè mất error gốc
-          });
-      }
-      throw err;
-    }
   }
   @MessagePattern({ cmd: "create-message" })
   async createMessage(@Payload() { user, body }: { user: AccessTokenPayload, body: CreateMessageBodyType }) {
