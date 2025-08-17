@@ -18,6 +18,8 @@ export class BookingsController {
   async createRequestService(@Payload() { body, customerID, userId }: { body: CreateServiceRequestBodyType, customerID: number, userId: number }) {
     console.log(body, userId, customerID);
     const serviceRequest = await this.bookingsService.createServiceRequest(body, customerID, userId)
+    console.log(body.paymentMethod === PaymentMethod.BANK_TRANSFER);
+
     if (body.paymentMethod === PaymentMethod.BANK_TRANSFER) {
       try {
 
@@ -35,7 +37,7 @@ export class BookingsController {
         handleZodError(error)
       }
     }
-
+    return serviceRequest
   }
   @MessagePattern({ cmd: "create-message" })
   async createMessage(@Payload() { user, body }: { user: AccessTokenPayload, body: CreateMessageBodyType }) {
