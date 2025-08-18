@@ -30,7 +30,6 @@ export class BookingsService {
     customerId: number,
     userId: number,
   ) {
-    console.log("toi r");
 
     const [category, provider] = await Promise.all([
       this.sharedCategoriesRepository.findUnique([body.categoryId]),

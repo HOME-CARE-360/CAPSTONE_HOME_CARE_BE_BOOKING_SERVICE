@@ -69,6 +69,8 @@ export class BookingRepository {
     }
 
     async getOrCreateConversation({ customerId, providerId }: { customerId: number, providerId: number }) {
+        console.log(customerId, providerId);
+
         const conversation = await this.prismaService.conversation.findFirst({
             where: { customerId, providerId },
         });
