@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, Post } from "@nestjs/common";
+import { Controller, Inject } from "@nestjs/common";
 import { BookingsService } from "./booking.service";
 import { MessagePattern, Payload } from "@nestjs/microservices";
 import { CreateServiceRequestBodyType } from "libs/common/src/request-response-type/booking/booking.model";

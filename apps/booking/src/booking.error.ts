@@ -10,6 +10,11 @@ export const ServiceRequestNotFoundException = new RpcException(
         { message: 'Error.ServiceRequestNotFound', path: ['id'] },
     ])
 );
+export const CustomerNotFoundExceptionException = new RpcException(
+    new UnprocessableEntityException([
+        { message: 'Error.CustomerNotFoundException', path: ['id'] },
+    ])
+);
 
 export const ServiceRequestInvalidStatusException = new RpcException(
     new UnprocessableEntityException([

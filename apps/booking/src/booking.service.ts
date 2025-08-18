@@ -9,7 +9,7 @@ import { SharedCategoryRepository } from 'libs/common/src/repositories/shared-ca
 import { CancelBookingType, CreateServiceRequestBodyType } from 'libs/common/src/request-response-type/booking/booking.model';
 import { RabbitService } from 'libs/common/src/services/rabbit.service';
 import { BookingRepository } from './booking.repo';
-import { BookingNotFoundOrNotBelongToProviderException, BuildWalletBalanceInsufficientException, ServiceRequestInvalidStatusException, ServiceRequestNotFoundException, UserInvalidRoleException } from './booking.error';
+import { BookingNotFoundOrNotBelongToProviderException, BuildWalletBalanceInsufficientException, CustomerNotFoundExceptionException, ServiceRequestInvalidStatusException, ServiceRequestNotFoundException, UserInvalidRoleException } from './booking.error';
 import { AccessTokenPayload } from 'libs/common/src/types/jwt.type';
 import { CreateMessageBodyType, GetListMessageQueryType } from 'libs/common/src/request-response-type/chat/chat.model';
 import { SharedWidthDrawRepository } from 'libs/common/src/repositories/share-withdraw.repo';
@@ -92,9 +92,30 @@ export class BookingsService {
     return await this.bookingRepository.getUserConversations(user)
   }
   async getOrCreateConversation(user: AccessTokenPayload, receiverId: number) {
-    const providerId = user.providerId ? user.providerId : receiverId
-    const customerId = user.customerId ? user.customerId : receiverId
-    return await this.bookingRepository.getOrCreateConversation({ customerId, providerId })
+    const isProvider = !!user.providerId;
+    const isCustomer = !!user.customerId;
+
+    if (!isProvider && !isCustomer) {
+      throw UserInvalidRoleException;
+    }
+
+    let providerId: number;
+    let customerId: number;
+
+    if (isProvider) {
+      providerId = user.providerId!;
+      const customer = await this.sharedBookingsRepository.findUniqueCustomer(receiverId);
+
+      if (!customer) throw CustomerNotFoundExceptionException;
+      customerId = customer.id;
+    } else {
+      customerId = user.customerId!;
+      const provider = await this.sharedProviderRepository.findUnique({ id: receiverId });
+      if (!provider) throw ServiceProviderNotFoundException;
+      providerId = provider.id;
+    }
+
+    return this.bookingRepository.getOrCreateConversation({ customerId, providerId });
   }
   async getMessages(query: GetListMessageQueryType) {
     return await this.bookingRepository.getMessages(query)

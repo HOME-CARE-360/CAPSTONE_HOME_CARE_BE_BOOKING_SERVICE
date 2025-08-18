@@ -1,4 +1,5 @@
 import { Injectable } from "@nestjs/common";
+import { RpcException } from "@nestjs/microservices";
 import { ChatSenderType, RequestStatus } from "@prisma/client";
 import { RoleName } from "libs/common/src/constants/role.constant";
 import { CancelBookingType, CreateServiceRequestBodyType } from "libs/common/src/request-response-type/booking/booking.model";
@@ -76,10 +77,14 @@ export class BookingRepository {
         });
 
         if (conversation) return conversation;
+        try {
+            return this.prismaService.conversation.create({
+                data: { customerId, providerId, updatedAt: new Date() },
+            });
+        } catch (error) {
+            throw new RpcException(error)
+        }
 
-        return this.prismaService.conversation.create({
-            data: { customerId, providerId, updatedAt: new Date() },
-        });
     }
     async getMessages(query: GetListMessageQueryType) {
         const skip = (query.page - 1) * query.limit;
