@@ -7,7 +7,6 @@ import { PAYMENT_SERVICE } from "libs/common/src/constants/service-name.constant
 import { handleZodError } from "libs/common/helpers";
 import { AccessTokenPayload } from "libs/common/src/types/jwt.type";
 import { CreateMessageBodyType, GetListMessageQueryType } from "libs/common/src/request-response-type/chat/chat.model";
-import { PaymentMethod } from "@prisma/client";
 
 
 @Controller('bookings')
@@ -16,28 +15,23 @@ export class BookingsController {
   @MessagePattern({ cmd: "create-service-request" })
   // @Post("create-service-request")
   async createRequestService(@Payload() { body, customerID, userId }: { body: CreateServiceRequestBodyType, customerID: number, userId: number }) {
-    console.log(body, userId, customerID);
-    const serviceRequest = await this.bookingsService.createServiceRequest(body, customerID, userId)
-    console.log(body.paymentMethod === PaymentMethod.BANK_TRANSFER);
+    const serviceRequest = await this.bookingsService.createServiceRequest(body, customerID)
+    try {
 
-    if (body.paymentMethod === PaymentMethod.BANK_TRANSFER) {
-      try {
+      return await this.paymentRawTcpClient.send({
+        type: 'CREATE_TRANSACTION', data: {
+          serviceRequestId: serviceRequest.id,
+          amount: 100000,
+          paymentMethod: body.paymentMethod, userId
+        }
+      })
 
-        return await this.paymentRawTcpClient.send({
-          type: 'CREATE_TRANSACTION', data: {
-            serviceRequestId: serviceRequest.id,
-            amount: 100000,
-            method: body.paymentMethod, userId
-          }
-        })
+    } catch (error) {
+      console.log(error);
 
-      } catch (error) {
-        console.log(error);
-
-        handleZodError(error)
-      }
+      handleZodError(error)
     }
-    return serviceRequest
+
   }
   @MessagePattern({ cmd: "create-message" })
   async createMessage(@Payload() { user, body }: { user: AccessTokenPayload, body: CreateMessageBodyType }) {

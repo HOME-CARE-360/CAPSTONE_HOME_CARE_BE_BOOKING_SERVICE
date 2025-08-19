@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BookingStatus, PaymentMethod, RequestStatus } from '@prisma/client';
+import { BookingStatus, RequestStatus } from '@prisma/client';
 import { InvalidCategoryIdException } from 'libs/common/src/errors/share-category.error';
 import { ServiceProviderNotFoundException } from 'libs/common/src/errors/share-provider.error';
 
@@ -9,11 +9,11 @@ import { SharedCategoryRepository } from 'libs/common/src/repositories/shared-ca
 import { CancelBookingType, CreateServiceRequestBodyType } from 'libs/common/src/request-response-type/booking/booking.model';
 import { RabbitService } from 'libs/common/src/services/rabbit.service';
 import { BookingRepository } from './booking.repo';
-import { BookingNotFoundOrNotBelongToProviderException, BuildWalletBalanceInsufficientException, CustomerNotFoundExceptionException, ServiceRequestInvalidStatusException, ServiceRequestNotFoundException, UserInvalidRoleException } from './booking.error';
+import { BookingNotFoundOrNotBelongToProviderException, CustomerNotFoundExceptionException, ServiceRequestInvalidStatusException, ServiceRequestNotFoundException, UserInvalidRoleException } from './booking.error';
 import { AccessTokenPayload } from 'libs/common/src/types/jwt.type';
 import { CreateMessageBodyType, GetListMessageQueryType } from 'libs/common/src/request-response-type/chat/chat.model';
 import { SharedWidthDrawRepository } from 'libs/common/src/repositories/share-withdraw.repo';
-const MIN_BALANCE = 100_000;
+
 @Injectable()
 export class BookingsService {
   constructor(
@@ -28,7 +28,6 @@ export class BookingsService {
   async createServiceRequest(
     body: CreateServiceRequestBodyType,
     customerId: number,
-    userId: number,
   ) {
 
     const [category, provider] = await Promise.all([
@@ -39,42 +38,23 @@ export class BookingsService {
     if (!category?.length) throw InvalidCategoryIdException([body.categoryId]);
     if (!provider) throw ServiceProviderNotFoundException;
 
-    let debited = false;
 
-    if (body.paymentMethod === PaymentMethod.WALLET) {
-      console.log("cc");
-      debited = await this.sharedWidthDrawRepository.debitIfSufficient(
-        userId,
-        MIN_BALANCE,
-      );
-      if (!debited) {
-        throw BuildWalletBalanceInsufficientException(MIN_BALANCE);
-      }
-    }
 
-    try {
-      const serviceRequest = await this.bookingRepository.createServiceRequest(
-        body,
-        customerId,
-      );
 
-      await this.sharedBookingsRepository.create({
-        customerId,
-        providerId: body.providerId,
-        status: BookingStatus.PENDING,
-        serviceRequestId: serviceRequest.id,
-      });
+    const serviceRequest = await this.bookingRepository.createServiceRequest(
+      body,
+      customerId,
+    );
 
-      return serviceRequest;
-    } catch (err) {
-      if (debited) {
-        await this.sharedWidthDrawRepository
-          .credit(userId, MIN_BALANCE)
-          .catch(() => {
-          });
-      }
-      throw err;
-    }
+    await this.sharedBookingsRepository.create({
+      customerId,
+      providerId: body.providerId,
+      status: BookingStatus.PENDING,
+      serviceRequestId: serviceRequest.id,
+    });
+
+    return serviceRequest;
+
   }
   async cancelBooking(body: CancelBookingType, providerId: number) {
     const serviceRequest = await this.sharedBookingsRepository.findUniqueServiceRequest(body.id)
