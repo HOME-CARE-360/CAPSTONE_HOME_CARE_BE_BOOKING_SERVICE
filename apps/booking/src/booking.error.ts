@@ -18,6 +18,12 @@ export const ServiceRequestInvalidStatusException = new RpcException(
         { message: 'Invalid service request status (must not be in progress)', path: ['status'] },
     ]),
 );
+export const CustomerNotFoundExceptionException = new RpcException(
+    new UnprocessableEntityException([
+        { message: 'Customer not found exception exception', path: ['status'] },
+    ]),
+);
+
 
 export const BookingNotFoundOrNotBelongToProviderException = new RpcException(
     new UnprocessableEntityException([
