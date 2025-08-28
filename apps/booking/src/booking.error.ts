@@ -1,48 +1,39 @@
-import {
-    UnprocessableEntityException,
-} from '@nestjs/common';
+import { UnprocessableEntityException } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-
-
 
 export const ServiceRequestNotFoundException = new RpcException(
     new UnprocessableEntityException([
-        { message: 'Error.ServiceRequestNotFound', path: ['id'] },
-    ])
+        { message: 'Service request not found', path: ['id'] },
+    ]),
 );
-export const CustomerNotFoundExceptionException = new RpcException(
+
+export const CustomerNotFoundException = new RpcException(
     new UnprocessableEntityException([
-        { message: 'Error.CustomerNotFoundException', path: ['id'] },
-    ])
+        { message: 'Customer not found', path: ['id'] },
+    ]),
 );
 
 export const ServiceRequestInvalidStatusException = new RpcException(
     new UnprocessableEntityException([
-        {
-            message: 'Error.ServiceRequestInProgress',
-            path: ['status'],
-        },
-    ])
+        { message: 'Invalid service request status (must not be in progress)', path: ['status'] },
+    ]),
 );
+
 export const BookingNotFoundOrNotBelongToProviderException = new RpcException(
     new UnprocessableEntityException([
-        {
-            message: 'Error.BookingNotFoundOrNotBelongToProvider',
-            path: ['bookingId'],
-        },
-    ])
+        { message: 'Booking not found or does not belong to this provider', path: ['bookingId'] },
+    ]),
 );
+
 export const UserInvalidRoleException = new RpcException(
     new UnprocessableEntityException([
-        {
-            message: 'Error.UserMustBeCustomerOrProvider',
-            path: ['user'],
-        },
-    ])
+        { message: 'User must be either a customer or a provider', path: ['user'] },
+    ]),
 );
+
 export const BuildWalletBalanceInsufficientException = (min: number) =>
     new RpcException(
         new UnprocessableEntityException([
-            { message: 'Error.WalletBalanceInsufficient', path: ['wallet', 'balance'], meta: { min } },
-        ])
+            { message: `Wallet balance is insufficient. Minimum required: ${min}`, path: ['wallet', 'balance'], meta: { min } },
+        ]),
     );

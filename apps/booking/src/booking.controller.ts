@@ -27,16 +27,12 @@ export class BookingsController {
       })
 
     } catch (error) {
-      console.log(error);
-
       handleZodError(error)
     }
 
   }
   @MessagePattern({ cmd: "create-message" })
   async createMessage(@Payload() { user, body }: { user: AccessTokenPayload, body: CreateMessageBodyType }) {
-    console.log("vo 1");
-
     return await this.bookingsService.createMessage(body, user)
   }
   @MessagePattern({ cmd: "get-user-conversation" })
