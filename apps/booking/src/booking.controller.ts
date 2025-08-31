@@ -7,21 +7,26 @@ import { PAYMENT_SERVICE } from "libs/common/src/constants/service-name.constant
 import { handleZodError } from "libs/common/helpers";
 import { AccessTokenPayload } from "libs/common/src/types/jwt.type";
 import { CreateMessageBodyType, GetListMessageQueryType } from "libs/common/src/request-response-type/chat/chat.model";
+import { PrismaService } from "libs/common/src/services/prisma.service";
 
 
 @Controller('bookings')
 export class BookingsController {
-  constructor(private readonly bookingsService: BookingsService, @Inject(PAYMENT_SERVICE) private readonly paymentRawTcpClient: RawTcpClientService) { }
+  constructor(private readonly bookingsService: BookingsService, @Inject(PAYMENT_SERVICE) private readonly paymentRawTcpClient: RawTcpClientService, private readonly prismaService: PrismaService) { }
   @MessagePattern({ cmd: "create-service-request" })
   // @Post("create-service-request")
   async createRequestService(@Payload() { body, customerID, userId }: { body: CreateServiceRequestBodyType, customerID: number, userId: number }) {
-    const serviceRequest = await this.bookingsService.createServiceRequest(body, customerID)
+    const [serviceRequest, sys] = await Promise.all([this.bookingsService.createServiceRequest(body, customerID), this.prismaService.systemConfig.findFirst({
+      where: {
+        key: "BOOKING_DEPOSIT"
+      }
+    })])
     try {
 
       return await this.paymentRawTcpClient.send({
         type: 'CREATE_TRANSACTION', data: {
           serviceRequestId: serviceRequest.id,
-          amount: 30000,
+          amount: sys?.value,
           paymentMethod: body.paymentMethod, userId
         }
       })
