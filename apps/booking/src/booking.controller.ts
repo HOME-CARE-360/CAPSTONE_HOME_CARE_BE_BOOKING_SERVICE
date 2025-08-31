@@ -26,7 +26,7 @@ export class BookingsController {
       return await this.paymentRawTcpClient.send({
         type: 'CREATE_TRANSACTION', data: {
           serviceRequestId: serviceRequest.id,
-          amount: sys?.value,
+          amount: Number(sys?.value),
           paymentMethod: body.paymentMethod, userId
         }
       })
